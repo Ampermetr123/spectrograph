@@ -1,14 +1,28 @@
 #include "window.h"
 
-MainWindow& MainWindow::instance() {
-    static MainWindow w;
-    return w;
-}
 
-MainWindow::MainWindow() {
-    cv::namedWindow(WIN_NAME, cv::WINDOW_AUTOSIZE | cv::WINDOW_GUI_NORMAL);
+
+MainWindow::MainWindow(Controller* controller) : ptr_ctrl(controller) {
+    cv::namedWindow(WIN_NAME, cv::WINDOW_AUTOSIZE | cv::WINDOW_GUI_EXPANDED);
     cv::setWindowTitle(WIN_NAME, "Спектрограф");
-//    cv::startWindowThread();
+
+    cv::createButton("Видео", []([[maybe_unused]]int state, void* pctrl) {
+            Controller* p= static_cast<Controller*>(pctrl);
+            if (p){
+                p->set_mode(Controller::mode::video);
+            };
+        }, &ptr_ctrl
+    );
+
+    cv::createButton("Спектр", []([[maybe_unused]]int state, void* pctrl) {
+        Controller* p= static_cast<Controller*>(pctrl);
+        if (p){
+            p->set_mode(Controller::mode::spectr);
+        };
+    }, &ptr_ctrl
+    );
+
+    cv::startWindowThread();
 }
 
 void MainWindow::draw(cv::Mat& img) {

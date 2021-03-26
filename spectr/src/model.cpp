@@ -1,5 +1,6 @@
 #include "model.h"
 #include <numeric> //accumulate
+#include "optlog.h"
 
 /*---------------- Model --------------------------------*/
 
@@ -31,6 +32,7 @@ void Model::notify() {
 /*---------------- Model Video --------------------------------*/
 
 void Model_Video::udpate_data(cv::Mat frame) {
+   
     data = frame;
     notify();
 }
@@ -53,6 +55,8 @@ void Model_Spectr::setROI(cv::Rect rect) {
 }
 
 void Model_Spectr::udpate_data(cv::Mat frame) {
+    // log1<<"s";
+    // std::cout.flush();
     cv::Mat img;
     if (roi == cv::Rect()) {
         this->setROI(cv::Rect(0, 0, frame.cols, frame.rows));

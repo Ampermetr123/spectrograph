@@ -1,7 +1,9 @@
 #pragma once
 #include "ocv.h"
 #include "model.h"
+
 #include "window.h"
+
 
 class View : public ModelSubscriber {
 protected:

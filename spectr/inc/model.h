@@ -19,7 +19,7 @@ public:
     void unsubscribe(std::weak_ptr<ModelSubscriber> handler);
     void notify();
     virtual void udpate_data(cv::Mat frame) = 0;
-    
+    virtual ~Model()=default;
 protected:
     cv::Mat data;
     std::list<std::weak_ptr<ModelSubscriber>> observers;

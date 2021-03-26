@@ -13,21 +13,34 @@ set (Sources
     src/main.cpp
     src/window.cpp
     src/model.cpp
+    src/controller.cpp
 )
+
 set (Headers
+    inc/controller.h
+    inc/model.h
+    inc/view.h
+    inc/window.h
+    inc/ocv.h
+    inc/optlog.h
 )
 
 add_executable(${This} ${Sources} ${Headers} )
 
-include_directories(${OpenCV_INCLUDE_DIR})
-target_link_libraries(${This} ${OpenCV_LIBS}
+target_include_directories(${This} PRIVATE
+    inc 
+    ${OpenCV_INCLUDE_DIR}
 )
 
+target_link_libraries(${This} 
+    ${OpenCV_LIBS}
+)
 
 set_target_properties(${This} ${ThisLib} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
+
 append_warn_flags(${This})
 
 install(TARGETS ${This} 

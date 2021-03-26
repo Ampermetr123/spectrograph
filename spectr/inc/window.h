@@ -1,6 +1,9 @@
 #pragma once
-#include "ocv.h"
+
 #include <string>
+#include <memory>
+#include "ocv.h"
+#include "controller.h"
 
 class Window {
 public:
@@ -8,19 +11,16 @@ public:
 };
 
 
-
-
 class MainWindow : public Window {
     const char* WIN_NAME = "SpectrMainWindow";    
-    MainWindow();
-
+    Controller*  ptr_ctrl;
 public:
-    static MainWindow& instance();
+    MainWindow(Controller* controller);
     operator const char* () {
         return WIN_NAME;
     } 
-    MainWindow(const MainWindow&) = delete;
-    MainWindow(MainWindow&&) = delete;
+    //MainWindow(const MainWindow&) = delete;
+  //  MainWindow(MainWindow&&) = delete;
     void draw(cv::Mat& img) override;
     void overlayText(std::string text, int mstime);
     bool visible();
