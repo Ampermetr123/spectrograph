@@ -14,6 +14,7 @@ set (Sources
     src/window.cpp
     src/model.cpp
     src/controller.cpp
+    src/capture.cpp
 )
 
 set (Headers
@@ -23,6 +24,7 @@ set (Headers
     inc/window.h
     inc/ocv.h
     inc/optlog.h
+    inc/capture.h
 )
 
 add_executable(${This} ${Sources} ${Headers} )

@@ -1,0 +1,11 @@
+# YAML file with options for Spectr application 
+
+# video source
+# integer for camera number, or path to first file img_XX.jpg for image sequance
+source: 0
+
+# capture options
+capture-options:
+  FPS: 20
+  FRAME_WIDTH: 800
+  FRAME_HEIGT: 600

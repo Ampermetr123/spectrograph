@@ -29,6 +29,16 @@ void Model::notify() {
     );
 }
 
+cv::Rect Model::get_ROI() 
+{
+    return this->roi;
+}
+
+void Model::set_ROI(cv::Rect rect) 
+{
+    roi = rect;
+}
+
 /*---------------- Model Video --------------------------------*/
 
 void Model_Video::udpate_data(cv::Mat frame) {
@@ -45,7 +55,7 @@ Model_Spectr::Model_Spectr(double start, double delta, long accumulate_time_ms)
     start_tick = 0;
 }
 
-void Model_Spectr::setROI(cv::Rect rect) {
+void Model_Spectr::set_ROI(cv::Rect rect) {
     roi = rect;
     spectr = cv::Mat::zeros(2, rect.width, CV_64F);
     for (int i = 0; i < rect.width; i++) {
@@ -59,11 +69,11 @@ void Model_Spectr::udpate_data(cv::Mat frame) {
     // std::cout.flush();
     cv::Mat img;
     if (roi == cv::Rect()) {
-        this->setROI(cv::Rect(0, 0, frame.cols, frame.rows));
+        this->set_ROI(cv::Rect(0, 0, frame.cols, frame.rows));
     }
 
     if (frame.cols < roi.width || frame.rows < roi.height) {
-        this->setROI(cv::Rect(0, 0, cv::min(frame.cols, roi.width), cv::min(frame.rows, roi.height)));
+        this->set_ROI(cv::Rect(0, 0, cv::min(frame.cols, roi.width), cv::min(frame.rows, roi.height)));
     }
 
 
@@ -88,6 +98,11 @@ void Model_Spectr::udpate_data(cv::Mat frame) {
         notify();
     }
 
+}
+
+void Model_ROI_Select::udpate_data(cv::Mat frame) 
+{
+    cv::selectROI(frame);
 }
 
 

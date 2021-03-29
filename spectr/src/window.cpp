@@ -22,6 +22,14 @@ MainWindow::MainWindow(Controller* controller) : ptr_ctrl(controller) {
     }, &ptr_ctrl
     );
 
+     cv::createButton("ROI", []([[maybe_unused]]int state, void* pctrl) {
+         Controller* p = static_cast<Controller*>(pctrl);
+        if (p){
+            p->set_mode(Controller::mode::roi_selct);
+        };
+    }, &ptr_ctrl
+    );
+
     cv::startWindowThread();
 }
 

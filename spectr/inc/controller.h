@@ -2,6 +2,9 @@
 
 #include "ocv.h"
 #include "model.h"
+#include "capture.h"
+
+#include <string>
 #include <memory>
 #include <atomic>
 #include <map>
@@ -13,23 +16,24 @@ class Controller {
 public:
     enum class mode{
         video,
-        spectr
+        spectr,
+        roi_selct
     };
-    static Controller& instance();
+    static Controller& instance(const std::string& config_file);
     int run();
     void set_mode(mode m);
- 
+    void set_roi();
+    cv::Mat frame;
 private:
-    Controller();
-    void on_start();
-    bool make_video_capture();
-    bool make_file_capture();
-
-    cv::VideoCapture cap;
+    Controller(const std::string& config_file);
+    
+    std::unique_ptr<Capture> capture = nullptr;
     std::unique_ptr<MainWindow> win_main;
     inline static std::atomic<mode> current_mode=mode::video;
     std::map<mode, std::unique_ptr<Model>> models;
     std::map<mode, std::shared_ptr<View>> views;
-    std::mutex mtx;
+   
+    cv::Rect roi;
 
 };
+
