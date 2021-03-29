@@ -29,16 +29,6 @@ void Model::notify() {
     );
 }
 
-cv::Rect Model::get_ROI() 
-{
-    return this->roi;
-}
-
-void Model::set_ROI(cv::Rect rect) 
-{
-    roi = rect;
-}
-
 /*---------------- Model Video --------------------------------*/
 
 void Model_Video::udpate_data(cv::Mat frame) {
@@ -55,27 +45,18 @@ Model_Spectr::Model_Spectr(double start, double delta, long accumulate_time_ms)
     start_tick = 0;
 }
 
-void Model_Spectr::set_ROI(cv::Rect rect) {
-    roi = rect;
-    spectr = cv::Mat::zeros(2, rect.width, CV_64F);
-    for (int i = 0; i < rect.width; i++) {
-        spectr.at<double>(1, i) = start_x + i * delta_x;
-    }
-    start_tick = cv::getTickCount();
-}
 
 void Model_Spectr::udpate_data(cv::Mat frame) {
-    // log1<<"s";
-    // std::cout.flush();
-    cv::Mat img;
-    if (roi == cv::Rect()) {
-        this->set_ROI(cv::Rect(0, 0, frame.cols, frame.rows));
-    }
 
-    if (frame.cols < roi.width || frame.rows < roi.height) {
-        this->set_ROI(cv::Rect(0, 0, cv::min(frame.cols, roi.width), cv::min(frame.rows, roi.height)));
+    static int prev_frame_cols = 0;
+    if (frame.cols != prev_frame_cols) {
+        prev_frame_cols = frame.cols;
+        spectr = cv::Mat::zeros(2, frame.cols, CV_64F);
+        for (int i = 0; i < frame.cols; i++) {
+            spectr.at<double>(1, i) = start_x + i * delta_x;
+        }
+        start_tick = cv::getTickCount();
     }
-
 
     if (start_tick == 0) {
         start_tick = cv::getTickCount();
@@ -83,7 +64,8 @@ void Model_Spectr::udpate_data(cv::Mat frame) {
 
     }
 
-    cv::cvtColor(cv::Mat(frame, roi), img, cv::COLOR_BGR2GRAY);
+    cv::Mat img;
+    cv::cvtColor(frame, img, cv::COLOR_BGR2GRAY);
     cv::Mat res(1, img.cols, CV_64F);
     for (int i = 0; i < img.cols; i++) {
         cv::Mat column = img.col(i);
@@ -100,10 +82,7 @@ void Model_Spectr::udpate_data(cv::Mat frame) {
 
 }
 
-void Model_ROI_Select::udpate_data(cv::Mat frame) 
-{
-    cv::selectROI(frame);
-}
+
 
 
 

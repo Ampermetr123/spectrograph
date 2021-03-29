@@ -11,7 +11,7 @@ MainWindow::MainWindow(Controller* controller) : ptr_ctrl(controller) {
             if (p){
                 p->set_mode(Controller::mode::video);
             };
-        }, &ptr_ctrl
+        }, &ptr_ctrl, cv::QT_PUSH_BUTTON 
     );
 
     cv::createButton("Спектр", []([[maybe_unused]]int state, void* pctrl) {
@@ -19,15 +19,15 @@ MainWindow::MainWindow(Controller* controller) : ptr_ctrl(controller) {
         if (p){
             p->set_mode(Controller::mode::spectr);
         };
-    }, &ptr_ctrl
+    }, &ptr_ctrl, cv::QT_PUSH_BUTTON 
     );
 
-     cv::createButton("ROI", []([[maybe_unused]]int state, void* pctrl) {
+     cv::createButton("Задать область анализа", []([[maybe_unused]]int state, void* pctrl) {
          Controller* p = static_cast<Controller*>(pctrl);
         if (p){
             p->set_mode(Controller::mode::roi_selct);
         };
-    }, &ptr_ctrl
+    }, &ptr_ctrl, cv::QT_PUSH_BUTTON | cv::QT_NEW_BUTTONBAR 
     );
 
     cv::startWindowThread();
@@ -53,13 +53,11 @@ NamedWindow::NamedWindow(std::string name):name(name) {
     cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
 }
 
-void NamedWindow::draw(cv::Mat& img) 
-{
+void NamedWindow::draw(cv::Mat& img) {
       cv::imshow(name, img);
 }
 
 
-bool NamedWindow::visible() 
-{
+bool NamedWindow::visible() {
     return cv::getWindowProperty(name, cv::WND_PROP_VISIBLE) > 0;
 }
