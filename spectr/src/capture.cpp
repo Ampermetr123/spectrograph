@@ -1,10 +1,17 @@
+/**
+ * @file capture.cpp
+ * @author S.B. Simonov (sb.simonov@gmail.com)
+ * @brief Реализация классов видеозахвата
+ */
+
 #include "capture.h"
 #include "optlog.h"
-#include <exception>
-#include <string>
 
 using namespace std::string_literals;
 
+/*----------------------  Capture  --------------------------------*/
+
+/*  See  https://docs.opencv.org/4.5.2/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d */
 const std::map<const std::string, long> Capture::cap_props = {
     {"POS_MSEC"s, cv::CAP_PROP_POS_MSEC }, // Current position of the video file in milliseconds. 
     {"POS_FRAMES"s, cv::CAP_PROP_POS_FRAMES }, // 0-based index of the frame to be decoded/captured next. 
@@ -33,7 +40,7 @@ const std::map<const std::string, long> Capture::cap_props = {
     {"ZOOM"s, cv::CAP_PROP_ZOOM },
     {"FOCUS"s, cv::CAP_PROP_FOCUS },
     {"GUID"s, cv::CAP_PROP_GUID },
-    {"SPEED"s, cv::CAP_PROP_ISO_SPEED },
+    {"ISO_SPEED"s, cv::CAP_PROP_ISO_SPEED },
     {"BACKLIGHT"s, cv::CAP_PROP_BACKLIGHT },
     {"PAN"s, cv::CAP_PROP_PAN },
     {"TILT"s, cv::CAP_PROP_TILT },
@@ -52,11 +59,15 @@ const std::map<const std::string, long> Capture::cap_props = {
 };
 
 
-
+/** Cоздание объекта видеозахвата в соответсвии с параметром capture_options:source
+ * @param fs Открытый cv::FileStorage с конфигурационными параметрами 
+ * @return std::unique_ptr<Capture>
+ * @throw runtime_error 
+ */
 std::unique_ptr<Capture> Capture::create(cv::FileStorage& fs) {
     auto src = fs["source"];
     if (src.isInt()) {
-        return std::make_unique<CameraCapture>(src, fs);
+         return std::make_unique<CameraCapture>(src, fs);
     }
     else if (src.isString()) {
         return std::make_unique<FileCapture>(src, fs);
@@ -66,18 +77,22 @@ std::unique_ptr<Capture> Capture::create(cv::FileStorage& fs) {
     }
 }
 
+/** Установка значения параметра для источинки видезахвата
+ * @param prop строковое имя параметра в соотв. Capture::cap_props
+ * @param value значение параметра
+ * @note Поддержка тех или иных параметров зависит от источинка видеозахвата и драйвера устройства
+ * Параметр может быть прогнорирован, установленное значение может не соответсвовать задаваемому.
+ * В случае возникновения таких ситуаций функция записывает сообщение в консоль через объект log0.
+ */
 void Capture::set_property(std::string prop, double value) {
     auto it = cap_props.find(prop);
     if (it == cap_props.end()) {
-        log0 << "Invalid property '" << prop << "'" << std::endl;
+        log0 << "Unknown property '" << prop << "'" << std::endl;
         return;
     }
-
-    auto ret = cap.set(it->second, value);
-    if (!ret) {
+    if (!cap.set(it->second, value)) {
         log0 << "Property '" << prop << "' not supported by backend" << std::endl;
     }
-
     double result_val = cap.get(it->second);
     if (std::abs(result_val - value) > 0.000001) {
         log0 << "Property '" << prop << "' wasn't set to asked value (" << value << ") and equeals " << result_val << std::endl;
@@ -87,18 +102,33 @@ void Capture::set_property(std::string prop, double value) {
     }
 }
 
-int Capture::height() 
-{
+/** Возвращает высоту захватываемого кадра */
+int Capture::height() {
     return static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT));
 }
 
-int Capture::width() 
-{
+/** Возвращает ширину захватываемого кадра */
+int Capture::width() {
     return static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH));
 }
 
-/*---------- Camera Capture ------------------------*/
+double Capture::get_property(std::string prop) 
+{
+    auto it = cap_props.find(prop);
+    if (it == cap_props.end()) {
+        log0 << "Unknown property '" << prop << "'" << std::endl;
+        return 0.0;
+    }
+    return cap.get(it->second);
+}
 
+/*---------------------- Camera Capture --------------------------------*/
+
+/** Создание объекта захвата с камеры. 
+ * @param devNo Номер устройства (камеры) на компьютере 
+ * @param fs Открытый FileStorage с конфигурацией.
+ * Все параметры capture_options применяются при создании объекта.
+ */
 CameraCapture::CameraCapture(int devNo, cv::FileStorage& fs) {
     if (!cap.open(devNo, cv::CAP_DSHOW)) {
         throw std::runtime_error("Can't open camera #"s + std::to_string(devNo));
@@ -110,24 +140,28 @@ CameraCapture::CameraCapture(int devNo, cv::FileStorage& fs) {
             set_property(opt.name(), opt);
         };
     }
-    else {
-        log1 << "options: " << options.type() << std::endl;
-    };
 }
 
+/** Ожидает и возвращает очередной кадр  */
 void CameraCapture::read(cv::Mat& frame) {
     cap.read(frame);
 }
 
-/*---------------- File Capture ------------------------- */
 
+/*-------------------- File Capture ------------------------------------ */
+
+/** Создание объекта захвата с файлов изображений. 
+ * @param path путь к первому файлу в серии изображений, имя файла img_%02d.jpg
+ * @param fs Открытый FileStorage с конфигурацией.
+ * Все параметры capture_options применяются при создании объекта.
+ * Эмулируется параметр FPS 
+ */
 FileCapture::FileCapture(std::string path, cv::FileStorage& fs)
 : ticks_in_ms(static_cast<const int64_t>(cv::getTickFrequency()/1000))
 {
     if (!cap.open(path, cv::CAP_IMAGES)) {
         throw std::runtime_error("Can't open file sequence with "s + path);
     };
-    delay_ms = 1000; // default
     auto options = fs["capture-options"];
     if (options.isMap()) {
         auto v = options["FPS"];
@@ -137,8 +171,8 @@ FileCapture::FileCapture(std::string path, cv::FileStorage& fs)
     }
 }
 
-void FileCapture::read(cv::Mat& frame) 
-{
+/** Ожидает и возвращает очередной кадр  */
+void FileCapture::read(cv::Mat& frame) {
     if (grab_time != 0) {
         int64_t from_last_grab_ms = std::abs(cv::getTickCount() - grab_time) / ticks_in_ms;
         while (from_last_grab_ms < delay_ms) {

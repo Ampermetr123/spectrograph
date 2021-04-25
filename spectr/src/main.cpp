@@ -1,16 +1,21 @@
+/**
+ * @file main.cpp
+ * @author Sergey Simonov (sb.simonov@gmail.com)
+ * @brief Программа для вычисления и визуализации спектра видеопотока
+ * @copyright Copyright (c) 2021
+ */
+
 #include <iostream>
 #include <string>
 #include "controller.h"
-#include "capture.h"
 
 
 int main(int argc, char** argv) {
 
-	// Config file ?
+	// Определение файла с глобальными параметрами программы
 	std::string config_file, default_config_file;
 	auto pos = std::string(argv[0]).find_last_of('.');
 	if (pos != std::string::npos) {
-		//std::cout << std::string(argv[0]) << " " << pos << "\n";
 		default_config_file = std::string(argv[0]).substr(0, pos) + ".yml";
 	}
 	else {
@@ -28,12 +33,16 @@ int main(int argc, char** argv) {
 		config_file = default_config_file;
 	}
 
-
 	try {
-		return Controller::instance(config_file).run();
+		Controller ctrl(config_file);
+		return ctrl.run();
+	}
+	catch (const cv::Exception& ex) {
+		std::cerr << "\nRuntime error:\n"<< ex.err << "\n";
+		return 0;
 	}
 	catch (const std::exception& ex) {
-		std::cerr << ex.what();
+		std::cerr << "\nRuntime error:\n" <<ex.what();
 		return 0;
 	}
 }

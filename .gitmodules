@@ -4,3 +4,9 @@
 [submodule "opencv_contrib"]
 	path = opencv_contrib
 	url = https://github.com/opencv/opencv_contrib.git
+[submodule "cv-plot"]
+	path = cv-plot
+	url = https://github.com/Profactor/cv-plot
+[submodule "fmt"]
+	path = fmt
+	url = https://github.com/fmtlib/fmt

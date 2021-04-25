@@ -1,11 +1,32 @@
-# YAML file with options for Spectr application 
+%YAML:1.0
+---
+# Global options for Spectr program
 
-# video source
-# integer for camera number, or path to first file img_XX.jpg for image sequance
-source: 0
+# Source of video. Number - is camera device. String - is path to img_NN.jpg file.  
+source: 0 
 
-# capture options
 capture-options:
-  FPS: 20
-  FRAME_WIDTH: 800
-  FRAME_HEIGT: 600
+  FPS: 20 # FPS make sence for camera and for file images
+  FRAME_WIDTH: 800  # Only for camera
+  FRAME_HEIGHT: 600 # Only for camer
+  # ...
+  # More options for camera could be found https://docs.opencv.org/4.5.2/d4/d15/group__videoio__flags__base.html
+  # but most of them won't work because of absence hardware/driver's support  
+  # ...
+  
+spectr:
+  CALIB_L1: 420 # Wave length for 1st calibration point
+  CALIB_L2: 600 # Wave length for 2nd calibration point
+  CALIB_L3: 700 # Wave length for 3rd calibration point
+  # Size of window for spectr rendering
+  WIN_WIDTH: 1024 
+  WIN_HEIGHT: 600
+
+# Setup what values will be passed to camera when user move trackbar
+control:
+  # Valid gain control values depends of camera and drivers
+  GAIN_STEP_VAL: 5
+  GAIN_STEPS: 12
+   # Valid exposue limit values depends of camera and drivers
+  EXPOSURE_LIMIT_LOW: -13 
+  EXPOSURE_LIMIT_HIGHT: -1

@@ -65,7 +65,7 @@ namespace optlog {
 
 // Default value, if it wasn't setup in build system
 #ifndef VERBOSE_LEVEL
-    #define VERBOSE_LEVEL 3
+    #define VERBOSE_LEVEL 0
 #endif
 
 // Any case ouput

@@ -1,37 +1,31 @@
+/**
+ * @file window.h
+ * @author Sergey Simonov (sb.simonov@gmail.com)
+ *  Графические окна приложения
+ */
 #pragma once
-
 #include <string>
-#include <memory>
-#include "ocv.h"
 #include "controller.h"
 
+/** Базовый функционал для окна приложения  */
 class Window {
+protected:
+    Window(const char* name);
+    const char* WIN_NAME;
 public:
-    virtual void draw(cv::Mat& img) = 0;
+    virtual ~Window() = default;
+    virtual void draw(const cv::Mat& img);
+    std::string name() const;
+    bool visible();
 };
 
 
+/** Главное окно приложения */
 class MainWindow : public Window {
-    const char* WIN_NAME = "SpectrMainWindow";    
     Controller*  ptr_ctrl;
 public:
     MainWindow(Controller* controller);
-    operator const char* () {
-        return WIN_NAME;
-    } 
-    //MainWindow(const MainWindow&) = delete;
-  //  MainWindow(MainWindow&&) = delete;
-    void draw(cv::Mat& img) override;
+    void create_controls();
     void overlayText(std::string text, int mstime);
-    bool visible();
 };
 
-
-
-class NamedWindow : public Window {
-    std::string name;
-public:
-    NamedWindow(std::string name);
-    void draw(cv::Mat& img) override;
-    bool visible();
-};
