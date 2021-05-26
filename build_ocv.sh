@@ -1,11 +1,15 @@
 #!/bin/bash -e
+
+# Script to build opencv lib on Windows Host
+# To run this script use git-bash
+
+
 myRepo=$(pwd)
 
 #CMAKE_GENERATOR_OPTIONS=-G"Visual Studio 16 2019"
 #CMAKE_GENERATOR_OPTIONS=-G"Visual Studio 15 2017 Win64"
 CMAKE_GENERATOR_OPTIONS=(-G"Visual Studio 16 2019" -A x64)  # CMake 3.14+ is required
 RepoSource=opencv
-#echo $myRepo/$
 
 mkdir -p build_opencv
 pushd build_opencv
